@@ -113,7 +113,11 @@ class SQLAlchemyIndex (Index):
         session.add(Version(id=self.version))
         for repository in self._walk_storage(store=store):
             session.add(Repository(**repository))
-        session.commit()
+        try:
+            session.commit()
+        except Exception as e:
+            logger.exception(str(e))
+            session.rollback()
 
     @retry
     def _handle_repository_created(
